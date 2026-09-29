@@ -141,11 +141,20 @@
 
   .plist{ display:flex; flex-direction:column; gap:8px; }
   .p-item{ border:1px solid var(--border); border-radius:12px; background:var(--paper); overflow:hidden; }
+  .p-item-host{ border:2px solid var(--gold); background:linear-gradient(135deg, var(--accent-soft), var(--paper) 60%); }
+  .p-item-notjoined{ opacity:0.55; }
+  .joined-badge{ display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:700; color:var(--gain); background:var(--gain-soft); border:1px solid var(--gain); border-radius:999px; padding:1px 7px; margin-left:6px; vertical-align:middle; letter-spacing:0.02em; white-space:nowrap; }
+  .join-status-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:-8px; }
+  .join-status-badge{ display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--gain); background:var(--gain-soft); border:1px solid var(--gain); border-radius:999px; padding:5px 12px; }
+  .btn-join{ font-family:inherit; font-size:12px; font-weight:700; padding:7px 14px; border-radius:999px; border:1px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer; }
+  .btn-join:hover{ filter:brightness(1.05); }
+  .rank-medal{ font-size:14px; line-height:1; flex:none; margin-left:5px; }
   .p-item > summary{ list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 16px; flex-wrap:wrap; }
   .p-item > summary::-webkit-details-marker{ display:none; }
   .p-left{ display:flex; align-items:center; gap:10px; }
   .p-order{ font-family:'IBM Plex Mono'; font-size:12px; color:var(--faint); min-width:24px; }
   .p-name-btn{ all:unset; cursor:pointer; font-weight:600; color:var(--ink); }
+  .host-badge{ display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft); border:1px solid var(--accent); border-radius:999px; padding:1px 7px; margin-left:6px; vertical-align:middle; letter-spacing:0.02em; white-space:nowrap; }
   .p-name-btn:hover{ color:var(--accent-ink); text-decoration:underline; }
   .p-right{ display:flex; align-items:center; gap:14px; font-family:'IBM Plex Mono'; font-size:13px; }
   .p-body{ border-top:1px solid var(--border); padding:14px 16px; display:flex; flex-direction:column; gap:12px; }
@@ -197,6 +206,17 @@
   .btn-mini.danger.confirm{ background:var(--loss); color:#fff; border-color:var(--loss); }
 
   .note-more-btn{ all:unset; cursor:pointer; color:var(--accent-ink); font-size:12px; text-decoration:underline; margin-left:4px; white-space:nowrap; }
+  .detail-btn{ all:unset; cursor:pointer; color:var(--accent-ink); font-size:12px; text-decoration:underline; margin-left:6px; white-space:nowrap; }
+  .share-icon-btn{ all:unset; cursor:pointer; font-size:13px; margin-left:6px; vertical-align:middle; line-height:1; }
+  .share-icon-btn:hover{ opacity:0.7; }
+  .photo-preview{ display:block; max-width:140px; max-height:140px; border-radius:10px; margin-top:8px; border:1px solid var(--border); object-fit:cover; }
+  .photo-input-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .photo-remove-row{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); margin-top:6px; }
+  .trade-detail-photo{ width:100%; border-radius:12px; display:block; margin-bottom:14px; border:1px solid var(--border); }
+  .trade-detail-row{ display:flex; justify-content:space-between; font-size:13px; padding:7px 0; border-bottom:1px solid var(--border); }
+  .trade-detail-row:last-of-type{ border-bottom:none; }
+  .trade-detail-note{ font-size:13px; line-height:1.65; white-space:pre-wrap; margin-top:12px; color:var(--ink); }
+  .trade-detail-note-label{ font-size:12px; font-weight:700; color:var(--muted); margin-top:12px; margin-bottom:4px; }
   .reveal-btn{ all:unset; cursor:pointer; color:var(--accent-ink); font-size:12px; text-decoration:underline; margin-left:4px; white-space:nowrap; }
 
   .rule-list{ margin:0; padding-left:18px; display:flex; flex-direction:column; gap:6px; font-size:13px; line-height:1.6; color:var(--muted); }
@@ -399,7 +419,7 @@
       </div>
     </div>
 
-    <div class="card" style="border-left:3px solid var(--accent);margin-top:14px;">
+    <div class="card" id="moesanDonation" hidden style="border-left:3px solid var(--accent);margin-top:14px;">
       <div style="font-weight:600;font-size:14px;margin-bottom:8px;">💛 후원 안내</div>
       <div class="section-note" style="margin-bottom:12px;">이 사이트와 채널은 광고 없이 100% 무료로 운영돼요. 운영 비용에 도움을 주시고 싶으신 분은 자유롭게 후원해주시면 감사하겠습니다.</div>
       <div class="support-account">
@@ -493,6 +513,8 @@
     <button class="btn" id="btnBackToMain">← 메인으로</button>
   </div>
 
+  <div class="join-status-row" id="joinStatusRow"></div>
+
   <div class="disclaimer" id="announcementBanner" hidden style="border-left-color:var(--accent);">
     <strong>📢 공지</strong> — <span id="announcementText"></span>
   </div>
@@ -550,6 +572,13 @@
         </div>
         <div class="field"><label>수익금 (USD)</label><input type="number" id="pfPnl" step="0.01" placeholder="예: 12.5 또는 -8" required></div>
         <div class="field full"><label>복기 메모</label><textarea id="pfNote" placeholder="이유, 느낀 점을 자유롭게 남겨보세요"></textarea></div>
+        <div class="field full">
+          <label>사진 (선택, 1장)</label>
+          <div class="photo-input-row">
+            <input type="file" accept="image/*" id="pfPhoto">
+          </div>
+          <img class="photo-preview" id="pfPhotoPreview" hidden>
+        </div>
       </div>
       <div class="form-actions">
         <span class="submit-msg" id="pSubmitMsg"></span>
@@ -656,6 +685,20 @@
   </div>
 </div>
 
+<div class="backdrop" id="tradeDetailBackdrop" hidden>
+  <div class="modal wide">
+    <h3>📋 매매 상세</h3>
+    <img class="trade-detail-photo" id="tradeDetailPhoto" src="" alt="매매 사진" hidden>
+    <div id="tradeDetailInfo"></div>
+    <div class="trade-detail-note-label">복기 메모</div>
+    <div class="trade-detail-note" id="tradeDetailNote"></div>
+    <div class="modal-actions">
+      <button class="btn" id="tradeDetailShare">🖼 이미지로 공유</button>
+      <button class="btn" id="tradeDetailClose">닫기</button>
+    </div>
+  </div>
+</div>
+
 <div class="backdrop" id="journalGuideBackdrop" hidden>
   <div class="modal wide">
     <h3 id="journalGuideTitle">✍️ 매매일지 작성 방법</h3>
@@ -679,10 +722,11 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import {
-  getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, setDoc, onSnapshot
+  getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, setDoc, onSnapshot, deleteField
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 // ---------------------------------------------------------------
@@ -772,7 +816,8 @@ const PARTICIPANTS = [
   {id:"p66",name:"강한",order:66,code:"9437"},
   {id:"p67",name:"탕 수육",order:67,code:"8643"},
   {id:"p68",name:"YJ",order:68,code:"1600"},
-  {id:"p69",name:"gfazs",order:69,code:"0945"}
+  {id:"p69",name:"gfazs",order:69,code:"0945"},
+  {id:"p70",name:"STOCK PICK | 고재트",order:70,code:"5577",host:true}
 ];
 
 // 관리자 모드 진입 코드 기본값. 관리자 모드에서 바꾸면 Firestore(config/admin)에 저장되고
@@ -819,6 +864,7 @@ setInterval(renderClock, 1000);
 let participantsCache = PARTICIPANTS;
 let tradesCache = [];
 let codeOverrides = {}; // {participantId: '1234'} — 관리자가 바꾼 코드
+let joinOverrides = {}; // {participantId: 'YYYY-MM-DD'} — 챌린지 참여 시작일
 let adminCodeCurrent = ADMIN_CODE_DEFAULT;
 let announcementText = '';
 let journalGuide = { title: '✍️ 매매일지 작성 방법', linkUrl: '', imageUrl: '' };
@@ -874,6 +920,125 @@ document.getElementById('mastheadLogo').src = LOGO_DATA_URI;
 
 function escapeHtml(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escapeAttr(s){ return escapeHtml(s); }
+
+function compressImageFile(file, maxDim, quality){
+  return new Promise((resolve, reject) => {
+    if (!file){ resolve(null); return; }
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다.'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('이미지를 불러올 수 없습니다.'));
+      img.onload = () => {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        const dim = maxDim || 1000;
+        if (w > dim || h > dim){
+          if (w >= h){ h = Math.round(h * (dim / w)); w = dim; }
+          else { w = Math.round(w * (dim / h)); h = dim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality || 0.7));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function wirePhotoPreview(inputEl, previewEl){
+  if (!inputEl || !previewEl) return;
+  inputEl.addEventListener('change', () => {
+    const file = inputEl.files && inputEl.files[0];
+    if (!file){ previewEl.hidden = true; previewEl.src = ''; return; }
+    const reader = new FileReader();
+    reader.onload = () => { previewEl.src = reader.result; previewEl.hidden = false; };
+    reader.readAsDataURL(file);
+  });
+}
+
+let currentDetailTrade = null;
+
+function openTradeDetail(t){
+  currentDetailTrade = t;
+  const photoEl = document.getElementById('tradeDetailPhoto');
+  if (t.photo){ photoEl.src = t.photo; photoEl.hidden = false; }
+  else { photoEl.src = ''; photoEl.hidden = true; }
+  const cls = pctClass(Number(t.pnl||0));
+  document.getElementById('tradeDetailInfo').innerHTML = `
+    <div class="trade-detail-row"><span>날짜</span><span class="mono">${t.date || ''}</span></div>
+    <div class="trade-detail-row"><span>종목명</span><span>${escapeHtml(t.ticker || '')}</span></div>
+    <div class="trade-detail-row"><span>포지션</span><span>${t.position || ''}</span></div>
+    <div class="trade-detail-row"><span>승패무</span><span>${t.result || ''}</span></div>
+    <div class="trade-detail-row"><span>수익금</span><span class="mono ${cls}">${Number(t.pnl) > 0 ? '+' : ''}${Number(t.pnl).toFixed(2)}</span></div>
+  `;
+  document.getElementById('tradeDetailNote').textContent = t.note || '(작성된 메모가 없습니다)';
+  document.getElementById('tradeDetailBackdrop').hidden = false;
+}
+function closeTradeDetail(){
+  document.getElementById('tradeDetailBackdrop').hidden = true;
+}
+document.getElementById('tradeDetailClose').addEventListener('click', closeTradeDetail);
+document.getElementById('tradeDetailBackdrop').addEventListener('click', (e) => {
+  if (e.target.id === 'tradeDetailBackdrop') closeTradeDetail();
+});
+document.getElementById('tradeDetailShare').addEventListener('click', () => {
+  if (currentDetailTrade) shareTradeCard(currentDetailTrade);
+});
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-view-trade]');
+  if (!btn) return;
+  const id = btn.getAttribute('data-view-trade');
+  const t = tradesCache.find(x => x.id === id);
+  if (t) openTradeDetail(t);
+});
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-share-trade]');
+  if (!btn) return;
+  const id = btn.getAttribute('data-share-trade');
+  const t = tradesCache.find(x => x.id === id);
+  if (t) shareTradeCard(t);
+});
+
+function waitForImageLoad(imgEl){
+  return new Promise(resolve => {
+    if (!imgEl || imgEl.hidden || !imgEl.src){ resolve(); return; }
+    if (imgEl.complete && imgEl.naturalWidth > 0){ resolve(); return; }
+    imgEl.onload = () => resolve();
+    imgEl.onerror = () => resolve();
+    setTimeout(resolve, 1500);
+  });
+}
+
+async function shareTradeCard(t){
+  openTradeDetail(t);
+  await waitForImageLoad(document.getElementById('tradeDetailPhoto'));
+  const modalEl = document.querySelector('#tradeDetailBackdrop .modal');
+  const actionsEl = modalEl.querySelector('.modal-actions');
+  const prevDisplay = actionsEl.style.display;
+  actionsEl.style.display = 'none';
+  try{
+    const canvas = await html2canvas(modalEl, { backgroundColor: null, scale: 2 });
+    actionsEl.style.display = prevDisplay;
+    canvas.toBlob(blob => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${t.ticker || 'trade'}_${t.date || ''}_매매일지.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    });
+  } catch(err){
+    actionsEl.style.display = prevDisplay;
+    alert('이미지 생성에 실패했습니다: ' + err.message);
+  }
+}
+
 function ym(dateStr){ return (dateStr || '').slice(0,7); }
 
 function computeLeaderboard(){
@@ -881,9 +1046,14 @@ function computeLeaderboard(){
   tradesCache.forEach(t => { pnlByPid[t.participantId] = (pnlByPid[t.participantId] || 0) + Number(t.pnl || 0); });
   return participantsCache.map(p => {
     const pnl = pnlByPid[p.id] || 0;
-    return { id: p.id, name: p.name, order: p.order, code: p.code || '', pnl, pct: (pnl / START_CAPITAL) * 100, balance: START_CAPITAL + pnl };
+    return { id: p.id, name: p.name, order: p.order, code: p.code || '', host: !!p.host, joinedAt: joinOverrides[p.id] || null, pnl, pct: (pnl / START_CAPITAL) * 100, balance: START_CAPITAL + pnl };
   });
 }
+
+function hostBadge(isHost){ return isHost ? ' <span class="host-badge">👑 방장</span>' : ''; }
+function joinedBadge(joinedAt){ return joinedAt ? ` <span class="joined-badge" title="참여일: ${escapeAttr(joinedAt)}">🚀 참여중</span>` : ''; }
+const RANK_MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' };
+function rankMedal(rank){ return rank ? `<span class="rank-medal" title="${rank}위">${RANK_MEDALS[rank]}</span>` : ''; }
 
 function noteCell(note){
   const safe = escapeHtml(note || '');
@@ -900,7 +1070,7 @@ function tradeRow(t){
     <td>${t.position || ''}</td>
     <td>${t.result || ''}</td>
     <td class="num mono ${cls}">${Number(t.pnl) > 0 ? '+' : ''}${Number(t.pnl).toFixed(2)}</td>
-    <td>${noteCell(t.note)}</td>
+    <td>${noteCell(t.note)}<button type="button" class="detail-btn" data-view-trade="${t.id}">자세히 보기</button><button type="button" class="share-icon-btn" data-share-trade="${t.id}" title="이미지로 공유" aria-label="이미지로 공유">📤</button></td>
     <td class="admin-only">
       <div class="row-actions"><button class="btn-mini" data-del-trade="${t.id}">삭제</button></div>
     </td>
@@ -934,6 +1104,8 @@ function renderAll(){
   document.getElementById('totalPct').className = 'n mono ' + pctClass(totalPct);
 
   const byPct = [...rows].sort((a,b) => (b.pct - a.pct) || (a.order - b.order));
+  const rankById = {};
+  byPct.slice(0,3).forEach((r,i) => { rankById[r.id] = i + 1; });
 
   const top3 = byPct.slice(0,3);
   const medalClass = ['g1','g2','g3'];
@@ -941,7 +1113,7 @@ function renderAll(){
   document.getElementById('top3').innerHTML = top3.map((r,i) => `
     <div class="top3-card ${medalClass[i]}">
       <div class="top3-rank"><span class="top3-medal">${medalNum[i]}</span>${i===0?'1위':i===1?'2위':'3위'}</div>
-      <div class="top3-name">${escapeHtml(r.name)}</div>
+      <div class="top3-name">${escapeHtml(r.name)}${hostBadge(r.host)}</div>
       <div class="top3-amt-big mono pnl-figure ${pctClass(r.pnl)}">${r.pnl > 0 ? '+' : ''}$${r.pnl.toLocaleString()}</div>
       <div class="top3-amt-krw mono">${fmtKrw(r.pnl)}</div>
       <div class="top3-pct ${pctClass(r.pct)} mono">${fmtPct(r.pct)} · 잔액 $${r.balance.toLocaleString()}</div>
@@ -961,11 +1133,11 @@ function renderAll(){
   document.getElementById('plist').innerHTML = plistSorted.map(p => {
     const trades = (tradesByPid[p.id] || []).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.id||'').localeCompare(a.id||''));
     return `
-    <details class="p-item" data-pid="${p.id}" data-pname="${escapeAttr(p.name.toLowerCase())}" ${openId === p.id ? 'open' : ''}>
+    <details class="p-item${p.host ? ' p-item-host' : ''}${p.joinedAt ? '' : ' p-item-notjoined'}" data-pid="${p.id}" data-pname="${escapeAttr(p.name.toLowerCase())}" ${openId === p.id ? 'open' : ''}>
       <summary>
         <div class="p-left">
           <span class="p-order mono">${String(p.order).padStart(2,'0')}</span>
-          <button type="button" class="p-name-btn" data-open-personal="${p.id}" data-open-name="${escapeAttr(p.name)}">${escapeHtml(p.name)}</button>
+          <button type="button" class="p-name-btn" data-open-personal="${p.id}" data-open-name="${escapeAttr(p.name)}">${escapeHtml(p.name)}</button>${rankMedal(rankById[p.id])}${hostBadge(p.host)}${joinedBadge(p.joinedAt)}
         </div>
         <div class="p-right">
           <span class="mono ${pctClass(p.pct)}">${fmtPct(p.pct)}</span>
@@ -1012,6 +1184,13 @@ function renderAll(){
               </div>
               <div class="field"><label>수익금 (USD)</label><input type="number" class="f-pnl" step="0.01" placeholder="예: 12.5" required></div>
               <div class="field full"><label>복기 메모</label><textarea class="f-note" placeholder="이유, 느낀 점"></textarea></div>
+              <div class="field full">
+                <label>사진 (선택, 1장)</label>
+                <div class="photo-input-row">
+                  <input type="file" accept="image/*" class="f-photo">
+                </div>
+                <img class="photo-preview f-photo-preview" hidden>
+              </div>
             </div>
             <div class="form-actions">
               <span class="submit-msg"></span>
@@ -1212,6 +1391,7 @@ function wireMainEvents(){
   });
 
   document.querySelectorAll('.add-trade-form').forEach(form => {
+    wirePhotoPreview(form.querySelector('.f-photo'), form.querySelector('.f-photo-preview'));
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const pid = form.getAttribute('data-pid');
@@ -1236,11 +1416,16 @@ function wireMainEvents(){
         note: form.querySelector('.f-note').value.trim()
       };
       try{
+        const photoFile = form.querySelector('.f-photo').files[0];
+        const photoData = await compressImageFile(photoFile, 1000, 0.7);
+        if (photoData) payload.photo = photoData;
         await addDoc(collection(db, 'trades'), payload);
         msg.className = 'submit-msg ok'; msg.textContent = '저장됐습니다.';
         form.reset();
         const altWrap = form.querySelector('.f-ticker-alt-wrap');
         if (altWrap) altWrap.hidden = true;
+        const photoPreview = form.querySelector('.f-photo-preview');
+        if (photoPreview){ photoPreview.hidden = true; photoPreview.src = ''; }
       } catch(err){
         msg.className = 'submit-msg err'; msg.textContent = '저장 실패: ' + err.message;
       }
@@ -1257,6 +1442,13 @@ onSnapshot(collection(db, 'codes'), snap => {
   snap.docs.forEach(d => { map[d.id] = d.data().code; });
   codeOverrides = map;
   renderAll();
+});
+onSnapshot(collection(db, 'joins'), snap => {
+  const map = {};
+  snap.docs.forEach(d => { map[d.id] = d.data().joinedAt; });
+  joinOverrides = map;
+  renderAll();
+  if (currentParticipant && !document.getElementById('personalScreen').hidden) renderJoinStatus();
 });
 onSnapshot(doc(db, 'config', 'admin'), snap => {
   adminCodeCurrent = (snap.exists() && snap.data().code) ? snap.data().code : ADMIN_CODE_DEFAULT;
@@ -1334,6 +1526,7 @@ function attemptMoesanUnlock(){
   closeMoesanModal();
   const gallery = document.getElementById('moesanGallery');
   gallery.hidden = false;
+  document.getElementById('moesanDonation').hidden = false;
   gallery.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 document.getElementById('moesanCover').addEventListener('click', openMoesanModal);
@@ -1353,6 +1546,7 @@ document.getElementById('moesanPinInput').addEventListener('keydown', (e) => {
 document.getElementById('moesanPinUnlock').addEventListener('click', attemptMoesanUnlock);
 document.getElementById('btnMoesanClose').addEventListener('click', () => {
   document.getElementById('moesanGallery').hidden = true;
+  document.getElementById('moesanDonation').hidden = true;
 });
 
 /* ---------------- code modal (admin + personal) ---------------- */
@@ -1512,12 +1706,38 @@ function openPersonalScreen(id, name, viaAdmin){
   personalTab = 'all';
   document.getElementById('app').hidden = true;
   document.getElementById('personalScreen').hidden = false;
-  document.getElementById('pName').textContent = name + '님의 매매일지' + (adminViewing ? ' (관리자 보기)' : '');
+  const pInfo = participantsCache.find(x => x.id === id);
+  document.getElementById('pName').innerHTML = escapeHtml(name) + '님의 매매일지' + (adminViewing ? ' (관리자 보기)' : '') + hostBadge(pInfo && pInfo.host);
   document.getElementById('pfDate').valueAsDate = new Date();
   document.getElementById('sharePreview').hidden = true;
   window.scrollTo(0,0);
   renderPersonal();
+  renderJoinStatus();
   maybeShowJournalGuide(id);
+}
+
+function renderJoinStatus(){
+  const row = document.getElementById('joinStatusRow');
+  if (!row || !currentParticipant) return;
+  const ja = joinOverrides[currentParticipant.id];
+  if (ja){
+    row.innerHTML = `<span class="join-status-badge">🚀 참여 중 · ${escapeHtml(ja)}부터</span>`;
+  } else {
+    row.innerHTML = `<button type="button" class="btn-join" id="btnJoinChallenge">🚀 챌린지 참여하기</button>`;
+    const btn = document.getElementById('btnJoinChallenge');
+    if (btn){
+      btn.addEventListener('click', async () => {
+        if (!currentParticipant) return;
+        btn.disabled = true;
+        const today = new Date().toISOString().slice(0,10);
+        try{
+          await setDoc(doc(db, 'joins', currentParticipant.id), { joinedAt: today });
+        } catch(err){
+          btn.disabled = false;
+        }
+      });
+    }
+  }
 }
 
 document.getElementById('btnBackToMain').addEventListener('click', () => {
@@ -1649,7 +1869,7 @@ function myTradeRow(t){
     <td>${t.position || ''}</td>
     <td>${t.result || ''}</td>
     <td class="num mono ${cls}">${Number(t.pnl) > 0 ? '+' : ''}${Number(t.pnl).toFixed(2)}</td>
-    <td>${noteCell(t.note)}</td>
+    <td>${noteCell(t.note)}<button type="button" class="detail-btn" data-view-trade="${t.id}">자세히 보기</button><button type="button" class="share-icon-btn" data-share-trade="${t.id}" title="이미지로 공유" aria-label="이미지로 공유">📤</button></td>
     <td><div class="row-actions">
       <button class="btn-mini" data-edit-mine="${t.id}">수정</button>
       <button class="btn-mini" data-del-mine="${t.id}">삭제</button>
@@ -1688,6 +1908,14 @@ function editFormRow(t){
       </div>
       <div class="field"><label>수익금 (USD)</label><input type="number" step="0.01" class="ef-pnl" value="${t.pnl}"></div>
       <div class="field full"><label>복기 메모</label><textarea class="ef-note">${escapeHtml(t.note||'')}</textarea></div>
+      <div class="field full">
+        <label>사진 (선택, 1장)</label>
+        <div class="photo-input-row">
+          <input type="file" accept="image/*" class="ef-photo">
+        </div>
+        ${t.photo ? `<label class="photo-remove-row"><input type="checkbox" class="ef-photo-remove"> 기존 사진 삭제</label>` : ''}
+        <img class="photo-preview ef-photo-preview" src="${t.photo ? t.photo : ''}" ${t.photo ? '' : 'hidden'}>
+      </div>
     </div>
     <div class="form-actions">
       <span class="submit-msg" data-edit-msg="${t.id}"></span>
@@ -1743,6 +1971,7 @@ function wirePersonalEvents(){
 function wireEditRow(id){
   const row = document.querySelector(`tr[data-edit-row="${id}"]`);
   if (!row) return;
+  wirePhotoPreview(row.querySelector('.ef-photo'), row.querySelector('.ef-photo-preview'));
   row.querySelector('.ef-ticker-select').addEventListener('change', (e) => {
     const altWrap = row.querySelector('.ef-ticker-alt-wrap');
     const altInput = row.querySelector('.ef-ticker-alt');
@@ -1771,6 +2000,14 @@ function wireEditRow(id){
       note: row.querySelector('.ef-note').value.trim()
     };
     try{
+      const photoInput = row.querySelector('.ef-photo');
+      const photoFile = photoInput && photoInput.files[0];
+      const removeCheck = row.querySelector('.ef-photo-remove');
+      if (photoFile){
+        payload.photo = await compressImageFile(photoFile, 1000, 0.7);
+      } else if (removeCheck && removeCheck.checked){
+        payload.photo = deleteField();
+      }
       await updateDoc(doc(db, 'trades', id), payload);
       msg.className = 'submit-msg ok'; msg.textContent = '저장됐습니다.';
     } catch(err){
@@ -1786,6 +2023,8 @@ document.getElementById('pfTickerSelect').addEventListener('change', (e) => {
   altWrap.hidden = !isAlt;
   if (isAlt){ setTimeout(() => altInput.focus(), 30); } else { altInput.value = ''; }
 });
+
+wirePhotoPreview(document.getElementById('pfPhoto'), document.getElementById('pfPhotoPreview'));
 
 document.getElementById('pTradeForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -1811,11 +2050,16 @@ document.getElementById('pTradeForm').addEventListener('submit', async (e) => {
     note: document.getElementById('pfNote').value.trim()
   };
   try{
+    const photoFile = document.getElementById('pfPhoto').files[0];
+    const photoData = await compressImageFile(photoFile, 1000, 0.7);
+    if (photoData) payload.photo = photoData;
     await addDoc(collection(db, 'trades'), payload);
     msg.className = 'submit-msg ok'; msg.textContent = '저장됐습니다.';
     e.target.reset();
     document.getElementById('pfDate').valueAsDate = new Date();
     document.getElementById('pfTickerAltWrap').hidden = true;
+    const photoPreview = document.getElementById('pfPhotoPreview');
+    photoPreview.hidden = true; photoPreview.src = '';
   } catch(err){
     msg.className = 'submit-msg err'; msg.textContent = '저장 실패: ' + err.message;
   }
